@@ -41,13 +41,19 @@ Route.get('/favoritos/:nome', async ({ params }) => {
   return [{ id: 1, nome: params.nome, url: "http://www.google.com", importante: true }]
 })
 
+//criar favorito com campo faltante 
 Route.post('/favoritos', async ({request,response})=>{
   const {nome,url,importante}=request.body()
   if(nome==undefined || url==undefined|| importante==undefined){
     return response.status(400)
   }
+  //criar favorito
   const newFavorito={id:favoritos.length+1,nome,url,importante}
   favoritos.push(newFavorito)
   return response.status(201).send(newFavorito)
 })
+
+//delete 
+
+//put
 
