@@ -6,6 +6,7 @@ test.group('List favoritos', () => {
     resposta.assertStatus(200)
     resposta.assertBodyContains([])
   })
+  
   //TDD
   test('exibir favorito com id', async ({client})=>{
     const resposta=await client.get('/favoritos/1')
