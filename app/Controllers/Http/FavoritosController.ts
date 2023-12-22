@@ -1,15 +1,12 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Favorito from 'App/Models/Favorito'
+import { DateTime } from 'luxon'
 
-let favoritos=[{
-  id:1, nome:'Google',
-  url:'http://www.google.com.br',
-  importante:true
-}]
 
 export default class FavoritosController {
   
   public async index({}: HttpContextContract) {
-    return favoritos
+    return Favorito.all()
   }
 
   public async store({response, request}: HttpContextContract) {
@@ -18,13 +15,13 @@ export default class FavoritosController {
       return response.status(400)
     }
     //criar favorito
-    const newFavorito={id:favoritos.length+1,nome,url,importante}
-    favoritos.push(newFavorito)
+    const newFavorito={nome,url,importante}
+    Favorito.create(newFavorito)
     return response.status(201).send(newFavorito)
   }
 
   public async show({params, response}: HttpContextContract) {
-    let favoritoEncontrado = favoritos.find((favorito) => favorito.id == params.id)
+    let favoritoEncontrado=await Favorito.findByOrFail('id',params.id)
     if (favoritoEncontrado == undefined)
     return response.status(404)
     return favoritoEncontrado
@@ -32,24 +29,24 @@ export default class FavoritosController {
 
   public async update({request, params, response}: HttpContextContract) {
     const {nome, url, importante}= request.body()
-    let favoritoEncontrado = favoritos.find((favorito) => favorito.id == params.id)
+    let favoritoEncontrado=await Favorito.findByOrFail('id',params.id)
     if (!favoritoEncontrado)
       return response.status(404)
     favoritoEncontrado.nome=nome
     favoritoEncontrado.url=url
     favoritoEncontrado.importante=importante
 
-    favoritos[params.id]=favoritoEncontrado
+    await favoritoEncontrado.save()
+    await favoritoEncontrado.merge({updatedAt:DateTime.local()}).save()
     return response.status(200).send(favoritoEncontrado)
   }
 
   public async destroy({response, params}: HttpContextContract) {
-    const favoritoIndex = favoritos.findIndex((favorito) => favorito.id == params.id);
-  if (favoritoIndex !== -1) {
-    favoritos.splice(favoritoIndex, 1);
-    return response.status(200).send({ message: 'Favorito deletado com sucesso' });
+    let favoritoEncontrado=await Favorito.findByOrFail('id',params.id)
+  if (!favoritoEncontrado) {
+    return response.status(404)
   } else {
-    return response.status(400).send({ message: 'Favorito inexistente' });
+    return response.status(204)
   }
   }
 }
