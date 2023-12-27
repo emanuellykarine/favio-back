@@ -46,6 +46,7 @@ export default class FavoritosController {
   if (!favoritoEncontrado) {
     return response.status(404)
   } else {
+    await favoritoEncontrado.delete()
     return response.status(204)
   }
   }

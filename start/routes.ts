@@ -81,8 +81,55 @@ Route.delete('/favoritos/:id', async ({ params, response }) => {
 });
 
 
+//-------------------------------------------------------------------------------------------------------
+//Rotas de usuário 
+const usuarios = [{ id: 1, nome: 'Emanuelly', cpf: "123456789", senha: "Senha123" }]
+
+//Ler usuarios
+Route.get('/usuarios', async () => {
+  return usuarios
+})
+
+//Criar usuário com campo faltante 
+Route.post('/usuarios', async ({request,response})=>{
+  const {nome,cpf,senha}=request.body()
+  if(nome==undefined || cpf==undefined|| senha==undefined){
+    return response.status(400)
+  }
+  //Criar usuário
+  const newUsuario={id:usuarios.length+1,nome,cpf,senha}
+  usuarios.push(newUsuario)
+  return response.status(201).send(newUsuario)
+})
 
 
+//Atualizar usuario
+Route.put('/usuarios/:id', async ({request, params, response}) => {
+  const {nome, cpf, senha}= request.body()
+    let usuarioEncontrado = usuarios.find((usuario) => usuario.id == params.id)
+    if (!usuarioEncontrado)
+      return response.status(404)
+    usuarioEncontrado.nome=nome
+    usuarioEncontrado.cpf=cpf
+    usuarioEncontrado.senha=senha
+
+    usuarios[params.id]=usuarioEncontrado
+    return response.status(200).send(usuarioEncontrado)
+})
+
+//Deletar usuario
+Route.delete('/usuarios/:id', async ({ params, response }) => {
+  const usuarioIndex = usuarios.findIndex((usuario) => usuario.id == params.id);
+  if (usuarioIndex !== -1) {
+    usuarios.splice(usuarioIndex, 1);
+    return response.status(200).send({ message: 'Usuario deletado com sucesso' });
+  } else {
+    return response.status(400).send({ message: 'Usuario inexistente' });
+  }
+});
+
+
+Route.resource('usuariao', 'UsuariosController').apiOnly()
 Route.resource('favoritao','FavoritosController').apiOnly()
 
 
